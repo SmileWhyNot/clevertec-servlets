@@ -3,10 +3,7 @@ package com.example.clevertecservlets.repository;
 
 import com.example.clevertecservlets.entity.User;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class UserRepository implements CRUDRepository<User> {
@@ -46,5 +43,9 @@ public class UserRepository implements CRUDRepository<User> {
         return users.values().stream()
                 .filter(user -> user.getUsername().equals(username))
                 .findFirst();
+    }
+
+    public List<User> getAllUsers() {
+        return users.values().stream().toList();
     }
 }

@@ -7,6 +7,8 @@ import com.example.clevertecservlets.exceptions.user.UsernameNotUniqueException;
 import com.example.clevertecservlets.repository.UserRepository;
 import com.example.clevertecservlets.utils.Validator;
 
+import java.util.List;
+
 public class UserService {
     private final UserRepository userRepository;
     private final Validator validator;
@@ -30,6 +32,7 @@ public class UserService {
                         || userRepository.isNameUnique(user.getUsername()))
         ) {
             existingUser.setUsername(user.getUsername());
+            existingUser.setPassword(user.getPassword());
             existingUser.setRoles(user.getRoles());
             return userRepository.update(existingUser).orElseThrow(() -> new UserOperationException("Failed to update"));
         }
@@ -50,5 +53,9 @@ public class UserService {
 
     public User getUserByUsername(String username) {
         return userRepository.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException("No user with username" + username));
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.getAllUsers();
     }
 }

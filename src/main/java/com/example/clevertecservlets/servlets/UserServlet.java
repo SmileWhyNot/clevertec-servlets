@@ -10,9 +10,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jdk.dynalink.linker.LinkerServices;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 @WebServlet(value = "/user")
@@ -29,10 +30,14 @@ public class UserServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-//        Long id = Long.parseLong(req.getParameter("id"));
-//        User user = userService.getUser(id);
-        User user = new User(1L, "123", "123", Collections.singleton(new Role(1L, "USER")));
-        sendResp(resp, user, 200);
+        if (req.getParameter("id") != null) {
+            Long id = Long.parseLong(req.getParameter("id"));
+            User user = userService.getUser(id);
+            sendResp(resp, user, 200);
+        } else {
+            List<User> users = userService.getAllUsers();
+            sendResp(resp, users, 200);
+        }
     }
 
     @Override
