@@ -21,7 +21,7 @@ public class AppInitializer implements ServletContextListener {
     }
 
     private void initializeRoles() {
-        RoleService roleService = new RoleService(new Validator());
+        RoleService roleService = new RoleService();
 
         Role adminRole = new Role(1L, "ADMIN");
         Role userRole = new Role(2L, "USER");
@@ -31,8 +31,8 @@ public class AppInitializer implements ServletContextListener {
     }
 
     private void initializeUsers() {
-        UserService userService = new UserService(new Validator());
-        RoleService roleService = new RoleService(new Validator());
+        UserService userService = new UserService();
+        RoleService roleService = new RoleService();
 
         User adminUser = new User(1L, "admin", "admin", Set.of(roleService.getRole(1L)));
         User normalUser = new User(2L, "user", "user", Set.of(roleService.getRole(2L)));

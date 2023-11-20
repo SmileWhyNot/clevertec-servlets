@@ -11,15 +11,13 @@ import java.util.List;
 
 public class UserService {
     private final UserRepository userRepository;
-    private final Validator validator;
 
-    public UserService(Validator validator) {
-        this.validator = validator;
+    public UserService() {
         this.userRepository = new UserRepository();
     }
 
     public User createUser(User user) {
-        if (userRepository.isNameUnique(user.getUsername()) && validator.validateUser(user)) {
+        if (userRepository.isNameUnique(user.getUsername()) && Validator.validateUser(user)) {
             return userRepository.create(user).orElseThrow(() -> new UserOperationException("Failed to update"));
         }
         throw new UsernameNotUniqueException("Username is not unique or user validation failed");
@@ -27,7 +25,7 @@ public class UserService {
 
     public User updateUser(User user) {
         User existingUser = userRepository.getById(user.getId()).orElseThrow(() -> new UserNotFoundException("Couldn't update, previous user not found"));
-        if (validator.validateUser(user) &&
+        if (Validator.validateUser(user) &&
                 (existingUser.getUsername().equals(user.getUsername())
                         || userRepository.isNameUnique(user.getUsername()))
         ) {

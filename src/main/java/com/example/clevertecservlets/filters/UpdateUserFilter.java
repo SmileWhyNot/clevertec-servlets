@@ -22,7 +22,7 @@ public class UpdateUserFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        this.userService = new UserService(new Validator());
+        this.userService = new UserService();
         this.gson = new Gson();
     }
 
@@ -72,18 +72,6 @@ public class UpdateUserFilter implements Filter {
 
         // Пользователь может обновить username и password без роли ADMIN
         return true;
-    }
-
-    private String readRequestBody(HttpServletRequest req) throws IOException {
-        StringBuilder requestBody = new StringBuilder();
-        try (BufferedReader reader = req.getReader()) {
-            char[] charBuffer = new char[8192];
-            int bytesRead;
-            while ((bytesRead = reader.read(charBuffer)) != -1) {
-                requestBody.append(charBuffer, 0, bytesRead);
-            }
-        }
-        return requestBody.toString();
     }
 
     @Override

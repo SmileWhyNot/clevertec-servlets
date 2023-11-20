@@ -24,7 +24,7 @@ public class UserServlet extends HttpServlet {
 
     @Override
     public void init() {
-        this.userService = new UserService(new Validator());
+        this.userService = new UserService();
         this.gson = new Gson();
     }
 
@@ -60,7 +60,9 @@ public class UserServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Long userIdToDelete = Long.parseLong(req.getParameter("id"));
         Set<Role> userRoles = (Set<Role>) req.getSession().getAttribute("roles");
-        if (userRoles != null && userRoles.contains("ADMIN")) {
+        boolean isAdmin = userRoles.stream().anyMatch(role -> "ADMIN".equals(role.getRoleName()));
+
+        if (isAdmin) {
             boolean deletionResult = userService.deleteUser(userIdToDelete);
 
             if (deletionResult) {

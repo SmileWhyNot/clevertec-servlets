@@ -15,7 +15,7 @@ import java.util.Base64;
 @WebFilter(urlPatterns = {"/user", "/role"}, filterName = "0")
 public class AuthFilter implements Filter {
 
-    private final UserService userService = new UserService(new Validator());
+    private final UserService userService = new UserService();
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
