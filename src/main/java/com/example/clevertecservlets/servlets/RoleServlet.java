@@ -1,15 +1,12 @@
 package com.example.clevertecservlets.servlets;
 
 import com.example.clevertecservlets.entity.Role;
-import com.example.clevertecservlets.entity.User;
 import com.example.clevertecservlets.exceptions.role.RoleNameNotUniqueException;
 import com.example.clevertecservlets.exceptions.role.RoleNotFoundException;
 import com.example.clevertecservlets.exceptions.role.RoleOperationException;
 import com.example.clevertecservlets.service.RoleService;
-import com.example.clevertecservlets.utils.Validator;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,13 +25,13 @@ public class RoleServlet extends HttpServlet {
     private Gson gson;
 
     @Override
-    public void init(ServletConfig config) throws ServletException {
+    public void init(ServletConfig config) {
         this.roleService = new RoleService();
         this.gson = new Gson();
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             if (req.getParameter("id") != null) {
                 Long id = Long.parseLong(req.getParameter("id"));
@@ -50,7 +47,7 @@ public class RoleServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             Role role = getFromRequest(req);
             Role roleResp = roleService.createRole(role);
@@ -63,7 +60,7 @@ public class RoleServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             Role role = getFromRequest(req);
             Set<Role> sessionRoles = (Set<Role>) req.getSession().getAttribute("roles");
@@ -86,7 +83,7 @@ public class RoleServlet extends HttpServlet {
     }
 
     @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             Long roleId = Long.parseLong(req.getParameter("id"));
 
@@ -119,7 +116,7 @@ public class RoleServlet extends HttpServlet {
         response.setContentType("application/json");
     }
 
-    private Role getFromRequest(HttpServletRequest request) throws IOException {
+    private Role getFromRequest(HttpServletRequest request) {
         String res = request.getAttribute("body").toString();
         return gson.fromJson(res, Role.class);
     }

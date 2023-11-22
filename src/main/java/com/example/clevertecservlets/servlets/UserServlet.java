@@ -6,14 +6,11 @@ import com.example.clevertecservlets.exceptions.user.UserNotFoundException;
 import com.example.clevertecservlets.exceptions.user.UserOperationException;
 import com.example.clevertecservlets.exceptions.user.UsernameNotUniqueException;
 import com.example.clevertecservlets.service.UserService;
-import com.example.clevertecservlets.utils.Validator;
 import com.google.gson.Gson;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jdk.dynalink.linker.LinkerServices;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,7 +45,7 @@ public class UserServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             User user = getFromRequest(req);
             User user1 = userService.createUser(user);
@@ -62,7 +59,7 @@ public class UserServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             User updatedUser = getFromRequest(req);
             User result = userService.updateUser(updatedUser);
@@ -76,7 +73,7 @@ public class UserServlet extends HttpServlet {
     }
 
     @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             Long userIdToDelete = Long.parseLong(req.getParameter("id"));
             Set<Role> userRoles = (Set<Role>) req.getSession().getAttribute("roles");
@@ -107,7 +104,7 @@ public class UserServlet extends HttpServlet {
         response.setContentType("application/json");
     }
 
-    private User getFromRequest(HttpServletRequest request) throws IOException {
+    private User getFromRequest(HttpServletRequest request) {
         String res = request.getAttribute("body").toString();
         return gson.fromJson(res, User.class);
     }
