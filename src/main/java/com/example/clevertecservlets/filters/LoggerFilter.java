@@ -8,16 +8,15 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @WebFilter(value = "/*", filterName = "1")
 public class LoggerFilter implements Filter {
 
-    private static Logger logger = Logger.getLogger(LoggerFilter.class);
+    private Logger logger;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-
+    public void init(FilterConfig filterConfig) {
+        this.logger = Logger.getLogger(LoggerFilter.class);
     }
 
     @Override
@@ -37,6 +36,6 @@ public class LoggerFilter implements Filter {
 
     @Override
     public void destroy() {
-
+        Filter.super.destroy();
     }
 }

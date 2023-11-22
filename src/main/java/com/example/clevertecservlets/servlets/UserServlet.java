@@ -2,6 +2,9 @@ package com.example.clevertecservlets.servlets;
 
 import com.example.clevertecservlets.entity.Role;
 import com.example.clevertecservlets.entity.User;
+import com.example.clevertecservlets.exceptions.user.UserNotFoundException;
+import com.example.clevertecservlets.exceptions.user.UserOperationException;
+import com.example.clevertecservlets.exceptions.user.UsernameNotUniqueException;
 import com.example.clevertecservlets.service.UserService;
 import com.example.clevertecservlets.utils.Validator;
 import com.google.gson.Gson;
@@ -30,50 +33,70 @@ public class UserServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (req.getParameter("id") != null) {
-            Long id = Long.parseLong(req.getParameter("id"));
-            User user = userService.getUser(id);
-            sendResp(resp, user, 200);
-        } else {
-            List<User> users = userService.getAllUsers();
-            sendResp(resp, users, 200);
+        try {
+            if (req.getParameter("id") != null) {
+                Long id = Long.parseLong(req.getParameter("id"));
+                User user = userService.getUser(id);
+                sendResp(resp, user, 200);
+            } else {
+                List<User> users = userService.getAllUsers();
+                sendResp(resp, users, 200);
+            }
+        } catch (UserNotFoundException e) {
+            sendErrorResp(resp, e.getMessage(), 400);
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        User user = getFromRequest(req);
-        User user1 = userService.createUser(user);
-        req.getSession().setAttribute("roles", user.getRoles());
-        sendResp(resp, user1, 201);
+        try {
+            User user = getFromRequest(req);
+            User user1 = userService.createUser(user);
+            req.getSession().setAttribute("roles", user.getRoles());
+            sendResp(resp, user1, 201);
+        } catch (UsernameNotUniqueException e) {
+            sendErrorResp(resp, e.getMessage(), 400);
+        } catch (UserOperationException e) {
+            sendErrorResp(resp, e.getMessage(), 500);
+        }
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        User updatedUser = getFromRequest(req);
-        User result = userService.updateUser(updatedUser);
-        req.getSession().setAttribute("roles", updatedUser.getRoles());
-        sendResp(resp, result, 200);
+        try {
+            User updatedUser = getFromRequest(req);
+            User result = userService.updateUser(updatedUser);
+            req.getSession().setAttribute("roles", updatedUser.getRoles());
+            sendResp(resp, result, 200);
+        } catch (UserNotFoundException | UsernameNotUniqueException e) {
+            sendErrorResp(resp, e.getMessage(), 400);
+        } catch (UserOperationException e) {
+            sendErrorResp(resp, e.getMessage(), 500);
+        }
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Long userIdToDelete = Long.parseLong(req.getParameter("id"));
-        Set<Role> userRoles = (Set<Role>) req.getSession().getAttribute("roles");
-        boolean isAdmin = userRoles.stream().anyMatch(role -> "ADMIN".equals(role.getRoleName()));
+        try {
+            Long userIdToDelete = Long.parseLong(req.getParameter("id"));
+            Set<Role> userRoles = (Set<Role>) req.getSession().getAttribute("roles");
+            boolean isAdmin = userRoles.stream().anyMatch(role -> "ADMIN".equals(role.getRoleName()));
 
-        if (isAdmin) {
-            boolean deletionResult = userService.deleteUser(userIdToDelete);
+            if (isAdmin) {
+                boolean deletionResult = userService.deleteUser(userIdToDelete);
 
-            if (deletionResult) {
-                req.getSession().invalidate();
-                sendResp(resp, "User deleted successfully", 200);
+                if (deletionResult) {
+                    req.getSession().invalidate();
+                    sendResp(resp, "User deleted successfully", 200);
+                } else {
+                    sendResp(resp, "Failed to delete user", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                }
             } else {
-                sendResp(resp, "Failed to delete user", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                resp.getWriter().println("Access denied");
             }
-        } else {
-            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            resp.getWriter().println("Access denied");
+        } catch (UserOperationException e) {
+            sendErrorResp(resp, e.getMessage(), 500);
         }
     }
 
@@ -87,5 +110,12 @@ public class UserServlet extends HttpServlet {
     private User getFromRequest(HttpServletRequest request) throws IOException {
         String res = request.getAttribute("body").toString();
         return gson.fromJson(res, User.class);
+    }
+
+    private void sendErrorResp(HttpServletResponse response, String errorMessage, int code) throws IOException {
+        String error = gson.toJson(errorMessage);
+        response.getWriter().write(error);
+        response.setStatus(code);
+        response.setContentType("application/json");
     }
 }

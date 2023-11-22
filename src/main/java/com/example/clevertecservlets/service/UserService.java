@@ -46,11 +46,11 @@ public class UserService {
     }
 
     public User getUser(Long id) {
-        return userRepository.getById(id).orElseThrow(() -> new UserNotFoundException("No user with id" + id));
+        return userRepository.getById(id).orElseThrow(() -> new UserNotFoundException("No user with id " + id));
     }
 
     public User getUserByUsername(String username) {
-        return userRepository.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException("No user with username" + username));
+        return userRepository.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException("No user with username " + username));
     }
 
     public List<User> getAllUsers() {

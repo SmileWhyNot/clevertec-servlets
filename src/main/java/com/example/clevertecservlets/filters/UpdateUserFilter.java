@@ -3,14 +3,12 @@ package com.example.clevertecservlets.filters;
 import com.example.clevertecservlets.entity.Role;
 import com.example.clevertecservlets.entity.User;
 import com.example.clevertecservlets.service.UserService;
-import com.example.clevertecservlets.utils.Validator;
 import com.google.gson.Gson;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Set;
 
@@ -21,7 +19,7 @@ public class UpdateUserFilter implements Filter {
     private Gson gson;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
         this.userService = new UserService();
         this.gson = new Gson();
     }
@@ -49,7 +47,6 @@ public class UpdateUserFilter implements Filter {
             User existingUser = userService.getUser(updatedUser.getId());
 
             if (canUpdateUser(updatedUser, existingUser, userRoles)) {
-                // Если проверка прошла успешно, пропускаем запрос дальше по цепочке фильтров
                 chain.doFilter(req, resp);
             } else {
                 resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -62,20 +59,16 @@ public class UpdateUserFilter implements Filter {
     }
 
     private boolean canUpdateUser(User updatedUser, User existingUser, Set<Role> userRoles) {
-        // Проверка, может ли пользователь обновить данные
         boolean isAdmin = userRoles.stream().anyMatch(role -> "ADMIN".equals(role.getRoleName()));
 
         if (updatedUser.getRoles() != null && !updatedUser.getRoles().equals(existingUser.getRoles())) {
-            // Если пользователь меняет роли, у него должна быть роль ADMIN
             return isAdmin;
         }
-
-        // Пользователь может обновить username и password без роли ADMIN
         return true;
     }
 
     @Override
     public void destroy() {
-
+        Filter.super.destroy();
     }
 }

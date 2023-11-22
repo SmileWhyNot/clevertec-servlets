@@ -1,8 +1,9 @@
 package com.example.clevertecservlets.filters;
 
 import com.example.clevertecservlets.entity.User;
+import com.example.clevertecservlets.exceptions.user.UserNotFoundException;
 import com.example.clevertecservlets.service.UserService;
-import com.example.clevertecservlets.utils.Validator;
+import com.google.gson.Gson;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,11 +16,13 @@ import java.util.Base64;
 @WebFilter(urlPatterns = {"/user", "/role"}, filterName = "0")
 public class AuthFilter implements Filter {
 
-    private final UserService userService = new UserService();
+    private UserService userService;
+    private Gson gson;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-
+    public void init(FilterConfig filterConfig) {
+        this.userService = new UserService();
+        this.gson = new Gson();
     }
 
     @Override
@@ -42,20 +45,28 @@ public class AuthFilter implements Filter {
             String username = credentialParts[0];
             String password = credentialParts[1];
 
-            User user = userService.getUserByUsername(username);
-
-            if (user.getPassword().equals(password)) {
-                req.getSession().setAttribute("roles", user.getRoles());
-                chain.doFilter(request, response);
-            } else {
+            try {
+                User user = userService.getUserByUsername(username);
+                if (user.getPassword().equals(password)) {
+                    req.getSession().setAttribute("roles", user.getRoles());
+                    chain.doFilter(request, response);
+                } else {
+                    HttpServletResponse httpResponse = (HttpServletResponse) response;
+                    httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                }
+            } catch (UserNotFoundException e) {
                 HttpServletResponse httpResponse = (HttpServletResponse) response;
-                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                String error = gson.toJson(e);
+                httpResponse.getWriter().write(error);
+                httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                httpResponse.setContentType("application/json");
             }
+
         }
     }
 
     @Override
     public void destroy() {
-
+        Filter.super.destroy();
     }
 }

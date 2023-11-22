@@ -4,7 +4,6 @@ import com.example.clevertecservlets.entity.Role;
 import com.example.clevertecservlets.entity.User;
 import com.example.clevertecservlets.service.RoleService;
 import com.example.clevertecservlets.service.UserService;
-import com.example.clevertecservlets.utils.Validator;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;

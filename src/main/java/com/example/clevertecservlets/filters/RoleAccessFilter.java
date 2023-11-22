@@ -23,9 +23,7 @@ public class RoleAccessFilter implements Filter {
 
         Set<Role> userRoles = (Set<Role>) req.getSession().getAttribute("roles");
 
-        // Проверка наличия роли ADMIN в сессии пользователя
         if (userRoles != null && userRoles.stream().anyMatch(role -> "ADMIN".equals(role.getRoleName()))) {
-            // Если роль ADMIN присутствует, пропускаем запрос дальше по цепочке фильтров
             chain.doFilter(req, resp);
         } else {
             resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
